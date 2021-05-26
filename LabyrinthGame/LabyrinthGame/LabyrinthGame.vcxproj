@@ -190,7 +190,6 @@
     <ClInclude Include="LabyrinthGameView.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="StartGameForm.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -201,7 +200,6 @@
     <ClCompile Include="LabyrinthGameDoc.cpp" />
     <ClCompile Include="LabyrinthGameView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
-    <ClCompile Include="StartGameForm.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -218,16 +216,9 @@
   <ItemGroup>
     <Image Include="cheese.bmp" />
     <Image Include="congratulations.bmp" />
-    <Image Include="doggy1.bmp" />
-    <Image Include="doggy2.bmp" />
-    <Image Include="doggy3.bmp" />
-    <Image Include="gerry.bmp" />
     <Image Include="mouse.bmp" />
-    <Image Include="rat.bmp" />
-    <Image Include="res\bitmap4.bmp" />
     <Image Include="res\LabyrinthGame.ico" />
     <Image Include="res\LabyrinthGameDoc.ico" />
-    <Image Include="splinter.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -22,7 +22,6 @@
 #define IDB_BITMAP2                     311
 #define IDD_CCONGRAT_DIALOG             312
 #define IDB_BITMAP3                     320
-#define IDD_START_GAME                  321
 #define IDB_BITMAP4                     328
 #define IDB_BITMAP5                     329
 #define IDB_BITMAP6                     330
@@ -30,12 +29,7 @@
 #define IDB_BITMAP8                     332
 #define IDB_BITMAP9                     333
 #define IDC_CongratText                 1000
-#define IDC_START                       1002
-#define IDC_EASY                        1003
-#define IDC_MEDIUM                      1004
 #define IDC_RADIO3                      1005
-#define IDC_HARD                        1005
-#define IDC_IMAGE_LEVEL                 1006
 #define ID_FILE_32771                   32771
 #define ID_NEW_GAME                     32772
 #define ID_32773                        32773

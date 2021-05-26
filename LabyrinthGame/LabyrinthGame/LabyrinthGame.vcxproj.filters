@@ -42,9 +42,6 @@
     <ClInclude Include="CongratDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StartGameForm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LabyrinthGame.cpp">
@@ -66,9 +63,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CongratDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StartGameForm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -96,27 +90,6 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="congratulations.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="doggy1.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\bitmap4.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="doggy2.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="doggy3.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="splinter.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="gerry.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="rat.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
