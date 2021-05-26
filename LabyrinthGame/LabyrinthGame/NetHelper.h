@@ -5,6 +5,7 @@ class NetHelper
 private:
 	SOCKET	m_sClient;
 public:
-	void Connect();
-
+	bool Connect();
+	void Send(char *message);
+	char * Receive();
 };

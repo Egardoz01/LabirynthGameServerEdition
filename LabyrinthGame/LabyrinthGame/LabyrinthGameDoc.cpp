@@ -38,11 +38,21 @@ CLabyrinthGameDoc::CLabyrinthGameDoc() noexcept
 	GameStarted = false;
 	LGrid.Initialize(20, 20);
 }
-
+char *GameStart()
+{
+	char * kek = new char[1024];
+	strcpy(kek, "1");
+	return kek;
+}
 void CLabyrinthGameDoc::StartGame()
 {
-	netHelper.Connect();
-
+	if (netHelper.Connect())
+	{
+		char * kek = GameStart();
+		netHelper.Send(kek);
+		netHelper.Receive();
+	}
+	return;
 	GameStarted = true;
 	int nRows;
 	int nColumns;
@@ -60,6 +70,7 @@ void CLabyrinthGameDoc::StartGame()
 	CurSeconds = 0;
 	
 }
+
 
 void CLabyrinthGameDoc::DoCongratulations(CString text)
 {

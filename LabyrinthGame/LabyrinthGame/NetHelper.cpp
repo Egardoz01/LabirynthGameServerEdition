@@ -2,7 +2,7 @@
 #include "NetHelper.h"
 #include <winsock2.h>
 
-void NetHelper::Connect()
+bool NetHelper::Connect()
 {
 	char szServer[128];	// Имя или IP-адрес сервера
 	int	iPort;			// Порт
@@ -21,7 +21,7 @@ void NetHelper::Connect()
 	if (WSAStartup(MAKEWORD(2, 2), &wsd) != 0)
 	{
 		AfxMessageBox((LPTSTR)"Failed to load Winsock library!"); //((LPTSTR));
-		return;
+		return false;
 	}
 	/*
 	* Функция сокета создает сокет, который привязан к определенному поставщику транспортных услуг.
@@ -41,7 +41,7 @@ void NetHelper::Connect()
 	{
 		str.Format(_T("socket() failed: %d\n"), WSAGetLastError());
 		AfxMessageBox(str);
-		return;
+		return false;
 	}
 	server.sin_family = AF_INET;
 	/*
@@ -77,7 +77,7 @@ void NetHelper::Connect()
 		{
 			str.Format(_T("Unable to resolve server: %s"), szServer);
 			AfxMessageBox(str);
-			return;
+			return false;
 		}
 		CopyMemory(&server.sin_addr, host->h_addr_list[0], host->h_length);
 	}
@@ -87,9 +87,43 @@ void NetHelper::Connect()
 	{
 		str.Format(_T("connect() failed: %d"), WSAGetLastError());
 		AfxMessageBox(str);
-		return;
+		return false;
 	}
 	str.Format(_T("Connected successfully"));
 	AfxMessageBox(str);
+	return true;
+}
 
+void NetHelper::Send(char *szMessage)
+{
+	CString str;
+	int		ret;
+	int len = strlen(szMessage);
+	ret = send(m_sClient, szMessage,len, 0);
+	if (ret == 0)
+		return;
+	if (ret == SOCKET_ERROR)
+	{
+		str.Format(_T("Failed to send"));
+		AfxMessageBox(str);
+		return;
+	}
+}
+
+char * NetHelper::Receive()
+{
+	CString str;
+	int		ret;
+	char	szBuffer[2048];
+	ret = recv(m_sClient, szBuffer, 2048, 0);
+	if (ret == 0)
+		return NULL;
+	if (ret == SOCKET_ERROR)
+	{
+		str.Format(_T("Failed to send"));
+		AfxMessageBox(str);
+		return NULL;
+	}
+	
+	return szBuffer;
 }

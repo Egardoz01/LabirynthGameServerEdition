@@ -431,6 +431,7 @@ UINT ListenThread(PVOID lpParam)
 				SocketInfo->DataBuf.len =
 					SocketInfo->BytesRECV - SocketInfo->BytesSEND;
 
+
 				if (WSASend(SocketInfo->Socket,
 					&(SocketInfo->DataBuf), 1,
 					&SendBytes, 0, NULL, NULL) ==
