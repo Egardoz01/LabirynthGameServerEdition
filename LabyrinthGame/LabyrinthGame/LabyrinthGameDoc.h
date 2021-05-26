@@ -2,7 +2,7 @@
 // LabyrinthGameDoc.h : interface of the CLabyrinthGameDoc class
 //
 #include "Grid.h"
-
+#include "NetHelper.h"
 #pragma once
 
 
@@ -15,6 +15,7 @@ protected: // create from serialization only
 // Attributes
 public:
 	Grid LGrid;
+	NetHelper netHelper;
 	int MouceCell_x;
 	int MouceCell_y;
 	int CheeseCell_x;

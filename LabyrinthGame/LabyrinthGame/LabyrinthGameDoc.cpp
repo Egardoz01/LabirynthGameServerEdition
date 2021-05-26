@@ -41,8 +41,8 @@ CLabyrinthGameDoc::CLabyrinthGameDoc() noexcept
 
 void CLabyrinthGameDoc::StartGame()
 {
+	netHelper.Connect();
 
-	
 	GameStarted = true;
 	int nRows;
 	int nColumns;

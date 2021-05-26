@@ -11,6 +11,7 @@
 
 #include "LabyrinthGameDoc.h"
 #include "LabyrinthGameView.h"
+#include <winsock2.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
