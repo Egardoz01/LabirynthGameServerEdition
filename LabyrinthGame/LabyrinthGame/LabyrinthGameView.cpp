@@ -43,8 +43,12 @@ CLabyrinthGameView::CLabyrinthGameView() noexcept
 
 }
 
+HWND hwnd;
+
 CLabyrinthGameView::~CLabyrinthGameView()
 {
+
+
 }
 
 BOOL CLabyrinthGameView::PreCreateWindow(CREATESTRUCT& cs)
@@ -294,23 +298,37 @@ void CLabyrinthGameView::ResizeWindowForGame()
 
 	CLabyrinthGameDoc* doc = GetDocument();
 
-	ASSERT_VALID(doc);
+
 	if (!doc)
 		return;
 
 	CRect rcClient, rcWindow;
 	GetClientRect(&rcClient);
-	GetParentFrame()->GetWindowRect(&rcWindow);
-		
-	int nWidthDiff = rcWindow.Width() - rcClient.Width();
-	int nHeightDiff = rcWindow.Height() - rcClient.Height();
 	
-	rcWindow.right = rcWindow.left +
-		cellWidth * doc->LGrid.nColumns + nWidthDiff + sPoint.x+5;
-	rcWindow.bottom = rcWindow.top +
-		cellHeight * doc->LGrid.nRows + nHeightDiff + sPoint.y + 5;
+	if (!hwnd)
+	{
+		hwnd = GetParentFrame()->m_hWnd;
+	}
+	if (hwnd)
+	{
 
-	GetParentFrame()->MoveWindow(&rcWindow);
+		CFrameWnd  *wnd =
+			(CFrameWnd *)(CFrameWnd::FromHandle(hwnd));
+
+
+		wnd->GetWindowRect(&rcWindow);
+		//GetParentFrame()->GetWindowRect(&rcWindow);
+
+		int nWidthDiff = rcWindow.Width() - rcClient.Width();
+		int nHeightDiff = rcWindow.Height() - rcClient.Height();
+
+		rcWindow.right = rcWindow.left +
+			cellWidth * doc->LGrid.nColumns + nWidthDiff + sPoint.x + 5;
+		rcWindow.bottom = rcWindow.top +
+			cellHeight * doc->LGrid.nRows + nHeightDiff + sPoint.y + 5;
+
+		wnd->MoveWindow(&rcWindow);
+	}
 }
 
 void CLabyrinthGameView::ResizeWindowForWaiting()
@@ -373,8 +391,7 @@ void CLabyrinthGameView::OnNewGame()
 {
 
 	GetDocument()->StartGame();
-	if(GetDocument()->GameStarted)
-		StartGame();
+	
 }
 
 

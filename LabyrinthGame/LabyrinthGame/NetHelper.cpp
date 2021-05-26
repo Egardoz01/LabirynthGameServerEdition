@@ -89,8 +89,8 @@ bool NetHelper::Connect()
 		AfxMessageBox(str);
 		return false;
 	}
-	str.Format(_T("Connected successfully"));
-	AfxMessageBox(str);
+//	str.Format(_T("Connected successfully"));
+	//AfxMessageBox(str);
 	return true;
 }
 

@@ -21,6 +21,60 @@
 // CLabyrinthGameDoc
 
 
+UINT ListenThread(PVOID lpParam);
+
+
+UINT ListenThread(PVOID lpParam)
+{
+
+
+	while (true)
+	{
+
+		//handleMessage(netHelper.Receive());
+		CLabyrinthGameDoc *pDoc = NULL;
+		pDoc = pDoc->GetDoccc();
+		char* buf = pDoc->netHelper.Receive();
+		if (buf != NULL)
+		{
+			pDoc->handleMessage(buf);
+		}
+		Sleep(100);
+	}
+}
+
+
+
+CLabyrinthGameDoc * CLabyrinthGameDoc::GetDoccc()
+{
+	CDocument* pDoc = NULL;
+	CWnd* pWndMain = AfxGetApp()->m_pMainWnd;
+	if (NULL != pWndMain)
+	{
+		if (pWndMain->IsKindOf(RUNTIME_CLASS(CMDIFrameWnd)))
+		{
+			// MDI application, so first we have to get the active MDI child frame.
+			CFrameWnd* pFrame = ((CMDIFrameWnd*)pWndMain)->MDIGetActive();
+			if (NULL != pFrame)
+			{
+				pDoc = pFrame->GetActiveDocument();
+			}
+		}
+		else if (pWndMain->IsKindOf(RUNTIME_CLASS(CFrameWnd)))
+		{
+			CFrameWnd* aa = (CFrameWnd*)pWndMain;
+			auto view = (CLabyrinthGameView*)aa->GetActiveView();
+			pDoc = view->GetDocument();
+		}
+		else
+		{
+			ASSERT(FALSE); // Neither MDI nor SDI application.
+		}
+	}
+
+	return (CLabyrinthGameDoc *)pDoc;
+}
+
 
 IMPLEMENT_DYNCREATE(CLabyrinthGameDoc, CDocument)
 
@@ -38,19 +92,87 @@ CLabyrinthGameDoc::CLabyrinthGameDoc() noexcept
 	GameStarted = false;
 	LGrid.Initialize(20, 20);
 }
-char *GameStart()
+
+char* CLabyrinthGameDoc:: GameStart()
 {
 	char * kek = new char[1024];
-	strcpy(kek, "1");
+	kek[0] = 1;//new session
 	return kek;
 }
+
+char* CLabyrinthGameDoc::FillGrid()
+{
+	char * kek = new char[1024];
+	kek[0] = 3;//new Grid
+	return kek;
+}
+
+char* CLabyrinthGameDoc::SendCords(int x, int y)
+{
+	char * kek = new char[1024];
+	kek[0] = 3;
+	kek[1] = sessionNumber;
+	kek[2] = player;
+	kek[3] = x;
+	kek[4] = y;
+	return kek;
+}
+
+void CLabyrinthGameDoc::handleMessage(char * str)
+{
+	if (str[0] == 2)//new session
+	{
+		sessionNumber = str[1];
+		player = str[2];
+		netHelper.Send(FillGrid());
+	}
+	if (str[0] == 4)//initializa field
+	{
+		int nRows = str[1];
+		int nColumns = str[2];
+		char *buff;
+		buff = str+3;
+		LGrid.FillGrid(nRows, nColumns,str);
+		GameStarted = true;
+		CLabyrinthGameView * curView = NULL;
+		POSITION pos = GetFirstViewPosition();
+		if (pos != NULL)
+		{
+			curView = (CLabyrinthGameView*)GetNextView(pos);
+			curView->StartGame();
+		}
+
+
+	}
+	if (str[0] == 6)//mouses Positions
+	{
+		if (player == 1)
+		{
+			MouceCell_x = str[1];
+			MouceCell_y = str[2];
+			Enemy_x = str[3];
+			Enemy_y = str[4];
+			CheeseCell_x = str[5];
+			CheeseCell_y = str[6];
+		}
+		if (player == 2)
+		{
+			MouceCell_x = str[3];
+			MouceCell_y = str[4];
+			Enemy_x = str[1];
+			Enemy_y = str[2];
+			CheeseCell_x = str[5];
+			CheeseCell_y = str[6];
+		}
+	}
+}
+
 void CLabyrinthGameDoc::StartGame()
 {
 	if (netHelper.Connect())
 	{
-		char * kek = GameStart();
-		netHelper.Send(kek);
-		netHelper.Receive();
+		netHelper.Send(GameStart());
+		AfxBeginThread(ListenThread, NULL);
 	}
 	return;
 	GameStarted = true;

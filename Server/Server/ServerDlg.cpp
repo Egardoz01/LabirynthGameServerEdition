@@ -7,6 +7,8 @@
 #include "ServerDlg.h"
 #include "afxdialogex.h"
 
+#include "Grid.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -73,9 +75,9 @@ HWND   hWnd_LB;  // Для вывода в других потоках
 
 UINT ListenThread(PVOID lpParam);
 
+void handleMessage(LPSOCKET_INFORMATION soket, DWORD Event, char *str, int len);
 
-
-
+void sendMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str);
 
 
 CServerDlg::CServerDlg(CWnd* pParent /*=nullptr*/)
@@ -414,11 +416,19 @@ UINT ListenThread(PVOID lpParam)
 					SocketInfo->BytesRECV = RecvBytes;
 					// Вывод сообщения, если требуется
 
+
+
+
+			
+
 					unsigned l = sizeof(Str) - 1;
 					if (l > RecvBytes) l = RecvBytes;
 					strncpy_s(Str, SocketInfo->Buffer, l);
 					Str[l] = 0;
 					pLB->AddString(Str);
+
+
+					handleMessage(SocketInfo,Event, SocketInfo->Buffer, l);
 				}
 			}
 
@@ -543,3 +553,110 @@ void FreeSocketInformation(DWORD Event, char *Str,
 	EventTotal--;
 }
 
+char *newSession()
+{
+	char *str = new char[1024];
+	str[0] = 2;//new session
+	str[1] = 1;//session number
+	return str;
+}
+
+
+char *fillGrid()
+{
+	char *str = new char[1024];
+	str[0] = 4;//new Grid
+	
+	Grid grid;
+	grid.Initialize(20, 20);
+	str[1] = grid.nRows;
+	str[2] = grid.nColumns;
+	int next = 3;
+	for(int i=0; i<grid.nRows; i++)
+		for (int j = 0; j < grid.nColumns; j++)
+		{
+			if (grid.grid[i][j].top == false && grid.grid[i][j].right == false)
+			{
+				str[next++] = 1;
+			}
+
+			if (grid.grid[i][j].top == false && grid.grid[i][j].right == true)
+			{
+				str[next++] = 2;
+			}
+
+			if (grid.grid[i][j].top == true && grid.grid[i][j].right == false)
+			{
+				str[next++] = 3;
+			}
+
+			if (grid.grid[i][j].top == true && grid.grid[i][j].right == true)
+			{
+				str[next++] = 4;
+			}
+		}
+
+
+	return str;
+}
+
+void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int len)
+{
+	if (str[0] == 1)//Starting session
+	{
+		sendMessage(SocketInfo, Event, newSession());
+	}
+	if (str[0] == 3)//Filling grid
+	{
+		sendMessage(SocketInfo, Event, fillGrid());
+	}
+}
+
+
+
+
+
+void sendMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str)
+{
+	DWORD SendBytes;
+	char  Str[200];
+	CListBox  *pLB =
+		(CListBox *)(CListBox::FromHandle(hWnd_LB));
+
+	SocketInfo->DataBuf.buf = str;
+	SocketInfo->DataBuf.len = strlen(str);
+
+	if (WSASend(SocketInfo->Socket,
+		&(SocketInfo->DataBuf), 1,
+		&SendBytes, 0, NULL, NULL) ==
+		SOCKET_ERROR)
+	{
+		if (WSAGetLastError() != WSAEWOULDBLOCK)
+		{
+			sprintf_s(Str, sizeof(Str),
+				"WSASend() failed with "
+				"error %d", WSAGetLastError());
+			pLB->AddString(Str);
+			FreeSocketInformation(
+				Event - WSA_WAIT_EVENT_0, Str, pLB);
+			return;
+		}
+
+		// Произошла ошибка WSAEWOULDBLOCK. 
+		// Событие FD_WRITE будет отправлено, когда
+		// в буфере будет больше свободного места
+	}
+	else
+	{
+		SocketInfo->BytesSEND += SendBytes;
+
+		if (SocketInfo->BytesSEND ==
+			SocketInfo->BytesRECV)
+		{
+			SocketInfo->BytesSEND = 0;
+			SocketInfo->BytesRECV = 0;
+		}
+	}
+
+
+}

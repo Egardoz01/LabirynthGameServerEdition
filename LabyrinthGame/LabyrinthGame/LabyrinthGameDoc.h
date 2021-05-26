@@ -8,16 +8,27 @@
 
 class CLabyrinthGameDoc : public CDocument
 {
-protected: // create from serialization only
+public:
+	CLabyrinthGameDoc * GetDoccc();
 	CLabyrinthGameDoc() noexcept;
+	char * GameStart();
+	char * FillGrid();
+	char * SendCords(int x, int y);
+	void handleMessage(char * str);
 	DECLARE_DYNCREATE(CLabyrinthGameDoc)
 
 // Attributes
 public:
+	int sessionNumber;
+	int player;
+
+
 	Grid LGrid;
 	NetHelper netHelper;
 	int MouceCell_x;
 	int MouceCell_y;
+	int Enemy_x;
+	int Enemy_y;
 	int CheeseCell_x;
 	int CheeseCell_y;
 	int CurSeconds;
@@ -39,6 +50,7 @@ public:
 public:
 	void StartGame();
 	void FinishGame(bool congrat);
+	CLabyrinthGameDoc & GetDoc();
 	void DoCongratulations(CString text);
 	void CheckForGameFinish();
 	void RightStep();
