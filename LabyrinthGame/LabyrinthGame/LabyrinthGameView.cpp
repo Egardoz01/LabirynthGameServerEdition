@@ -411,7 +411,7 @@ void CLabyrinthGameView::OnNewGame()
 void CLabyrinthGameView::OnFinishGame()
 {
 	
-	GetDocument()->FinishGame(false);
+	GetDocument()->FinishGame(false, false);
 }
 
 

@@ -91,7 +91,8 @@ struct SessionInfo {
 	Grid* grid;
 };
 
-SessionInfo _sessions[256];
+int const  MAX_SESSIONS = 256;
+SessionInfo _sessions[MAX_SESSIONS];
 int sessionNum = 1;
 LPSOCKET_INFORMATION queue = NULL;
 
@@ -583,7 +584,7 @@ char *fillGrid(int sessionNumber)
 	str[0] = 4;//new Grid
 
 	Grid* grid = new Grid();
-	grid->Initialize(10, 10);
+	grid->Initialize(5, 5);
 	str[1] = grid->nRows;
 	str[2] = grid->nColumns;
 	int next = 3;
@@ -655,6 +656,8 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 
 			
 			int sessionNumber = sessionNum++;
+			if (sessionNum >= MAX_SESSIONS)
+				sessionNum = 1;
 			_sessions[sessionNumber].player1 = queue;
 			_sessions[sessionNumber].player2 = SocketInfo;
 			queue = NULL;
@@ -711,6 +714,15 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 		sendMessage(_sessions[sessionNumber].player1, Event, sendCords(sessionNumber));
 		sendMessage(_sessions[sessionNumber].player2, Event, sendCords(sessionNumber));
 
+	}
+
+	if (str[0] == 5)//finish game
+	{
+		char  Str[200];
+		CListBox  *pLB =
+			(CListBox *)(CListBox::FromHandle(hWnd_LB));
+		FreeSocketInformation(
+			Event - WSA_WAIT_EVENT_0, Str, pLB);
 	}
 
 

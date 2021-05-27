@@ -34,7 +34,11 @@ UINT ListenThread(PVOID lpParam)
 		//handleMessage(netHelper.Receive());
 		CLabyrinthGameDoc *pDoc = NULL;
 		pDoc = pDoc->GetDoccc();
+		if (pDoc->GameStarted == false && pDoc->WaitingForSecondPlayer==false)
+			return 0;
+
 		char* buf = pDoc->netHelper.Receive();
+		
 		if (buf != NULL)
 		{
 			pDoc->handleMessage(buf);
@@ -100,6 +104,7 @@ char* CLabyrinthGameDoc:: GameStart()
 	return kek;
 }
 
+
 char* CLabyrinthGameDoc::SendMove(int x)
 {
 	char * kek = new char[1024];
@@ -109,6 +114,14 @@ char* CLabyrinthGameDoc::SendMove(int x)
 	kek[3] = x;//1-left 2-top 3-right 4-bot
 	return kek;
 }
+
+char* CLabyrinthGameDoc::GameFinish()
+{
+	char * kek = new char[1024];
+	kek[0] = 5;//delete session
+	return kek;
+}
+
 
 void CLabyrinthGameDoc::handleMessage(char * str)
 {
@@ -125,6 +138,7 @@ void CLabyrinthGameDoc::handleMessage(char * str)
 		buff = str+3;
 		LGrid.FillGrid(nRows, nColumns,buff);
 		GameStarted = true;
+		WaitingForSecondPlayer = false;
 		CLabyrinthGameView * curView = NULL;
 		POSITION pos = GetFirstViewPosition();
 		if (pos != NULL)
@@ -174,25 +188,9 @@ void CLabyrinthGameDoc::StartGame()
 	if (netHelper.Connect())
 	{
 		netHelper.Send(GameStart());
+		WaitingForSecondPlayer = true;
 		AfxBeginThread(ListenThread, NULL);
 	}
-	return;
-	GameStarted = true;
-	int nRows;
-	int nColumns;
-	
-	nRows = 20;
-	nColumns = 20;
-	
-	LGrid.Initialize(nRows, nColumns);
-
-	MouceCell_x = 0;
-	MouceCell_y = 0;
-	CheeseCell_x = LGrid.nColumns - 1;
-	CheeseCell_y = LGrid.nRows - 1;
-
-	CurSeconds = 0;
-	
 }
 
 
@@ -206,14 +204,14 @@ void CLabyrinthGameDoc::DoCongratulations(CString text)
 void CLabyrinthGameDoc::CheckForGameFinish()
 {
 	if (MouceCell_x == CheeseCell_x && MouceCell_y == CheeseCell_y)
-	{
-		FinishGame(true);
-	}
+		FinishGame(true, true);
+	if(Enemy_x == CheeseCell_x && Enemy_y == CheeseCell_y)
+		FinishGame(true, false);
+
 }
 
-void CLabyrinthGameDoc::FinishGame(bool congrat)
+void CLabyrinthGameDoc::FinishGame(bool congrat, bool win)
 {
-
 	GameStarted = false;
 	CLabyrinthGameView * curView = NULL;
 	POSITION pos = GetFirstViewPosition();
@@ -222,17 +220,22 @@ void CLabyrinthGameDoc::FinishGame(bool congrat)
 	{
 		curView = (CLabyrinthGameView*)GetNextView(pos);
 		curView->FinishGame();
+		curView->OnInitialUpdate();
 
 	}
 	if (congrat)
 	{
 		CString strCongratulations;
-		strCongratulations.Format(_T("ПОЗДРАВЛЯЕМ!!!\nВы выбрались из DUNGEON за %d секунд"), CurSeconds);
+		if(win)
+			strCongratulations.Format(_T("ПОЗДРАВЛЯЕМ!!!\nВы выбрались из DUNGEON за %d секунд"), CurSeconds);
+		else
+			strCongratulations.Format(_T("Вы проиграли\nНе растраивайтесь, повезет в следующей катке"));
 
 		DoCongratulations(strCongratulations);
 	}
-	OnNewDocument();
-	
+
+	netHelper.Send(GameFinish());
+	//OnNewDocument();
 }
 
 /*

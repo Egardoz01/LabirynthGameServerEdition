@@ -12,6 +12,7 @@ public:
 	CLabyrinthGameDoc * GetDoccc();
 	CLabyrinthGameDoc() noexcept;
 	char * GameStart();
+	char * GameFinish();
 	char * SendMove(int x);
 	void handleMessage(char * str);
 	DECLARE_DYNCREATE(CLabyrinthGameDoc)
@@ -31,7 +32,9 @@ public:
 	int CheeseCell_x;
 	int CheeseCell_y;
 	int CurSeconds;
+
 	bool GameStarted;
+	bool WaitingForSecondPlayer;
 // Operations
 public:
 
@@ -48,7 +51,7 @@ public:
 // Implementation
 public:
 	void StartGame();
-	void FinishGame(bool congrat);
+	void FinishGame(bool congrat, bool win);
 	void DoCongratulations(CString text);
 	void CheckForGameFinish();
 	void RightStep();
