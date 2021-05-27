@@ -287,8 +287,8 @@ void CLabyrinthGameView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		break;
 	}
 
-	this->RedrawWindow();
-	doc->CheckForGameFinish();
+	//this->RedrawWindow();
+	
 	CView::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 

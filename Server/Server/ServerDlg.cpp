@@ -431,11 +431,6 @@ UINT ListenThread(PVOID lpParam)
 					SocketInfo->BytesRECV = RecvBytes;
 					// Вывод сообщения, если требуется
 
-
-
-
-
-
 					unsigned l = sizeof(Str) - 1;
 					if (l > RecvBytes) l = RecvBytes;
 					strncpy_s(Str, SocketInfo->Buffer, l);
@@ -445,8 +440,12 @@ UINT ListenThread(PVOID lpParam)
 
 					handleMessage(SocketInfo, Event, SocketInfo->Buffer, l);
 				}
-			}
 
+				SocketInfo->BytesSEND = 0;
+				SocketInfo->BytesRECV = 0;
+
+			}
+			/*
 			// Отправка данных, если это возможно
 
 			if (SocketInfo->BytesRECV > SocketInfo->BytesSEND)
@@ -488,7 +487,7 @@ UINT ListenThread(PVOID lpParam)
 						SocketInfo->BytesRECV = 0;
 					}
 				}
-			}
+			}*/
 		}
 		if (NetworkEvents.lNetworkEvents & FD_CLOSE)
 		{
@@ -628,6 +627,21 @@ char *fillGrid(int sessionNumber)
 	return str;
 }
 
+
+char *sendCords(int sessionNumber)
+{
+	char *str = new char[1024];
+	str[0] = 6;//new cords
+	str[1] = _sessions[sessionNumber].player1_x+1;
+	str[2] = _sessions[sessionNumber].player1_y+1;
+	str[3] = _sessions[sessionNumber].player2_x+1;
+	str[4] = _sessions[sessionNumber].player2_y+1;
+	str[5] = _sessions[sessionNumber].cheese_x+1;
+	str[6] = _sessions[sessionNumber].cheese_y+1;
+
+	return str;
+}
+
 void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int len)
 {
 	if (str[0] == 1)//Starting session
@@ -638,20 +652,67 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 		}
 		else
 		{
-			//sendMessage(queue, Event, newSession(1,sessionNum));
-			sendMessage(SocketInfo, Event, newSession(2, sessionNum));
-			_sessions[sessionNum].player1 = queue;
-			_sessions[sessionNum].player2 = SocketInfo;
 
-			char * mess = fillGrid(sessionNum);
-			//sendMessage(queue, Event, mess);
-			sendMessage(SocketInfo, Event, mess);
-
-
+			
+			int sessionNumber = sessionNum++;
+			//_sessions[sessionNumber.player1 = queue;
+			_sessions[sessionNumber].player2 = SocketInfo;
 			queue = NULL;
-			sessionNum++;
+			//sendMessage(_sessions[sessionNumber.player1, Event, newSession(1,sessionNumber));
+			sendMessage(_sessions[sessionNumber].player2, Event, newSession(2, sessionNumber));
+			Sleep(100);
+			char * mess = fillGrid(sessionNumber);
+			//sendMessage(_sessions[sessionNumber.player1, Event, mess);
+			sendMessage(_sessions[sessionNumber].player2, Event, mess);
+			Sleep(100);
+			//sendMessage(_sessions[sessionNumber].player1, Event, sendCords(sessionNumber));
+			sendMessage(_sessions[sessionNumber].player2, Event, sendCords(sessionNumber));
+			Sleep(100);
+			
 		}
 	}
+
+	if (str[0] == 3)//make move
+	{
+		int sessionNumber = str[1];
+		int player = str[2];
+		if (player == 1)
+		{
+			if (str[3] == 1 && _sessions[sessionNumber].player1_x > 0 && _sessions[sessionNumber].grid->grid[_sessions[sessionNumber].player1_y][_sessions[sessionNumber].player1_x-1].right == false)
+				_sessions[sessionNumber].player1_x--;
+			
+			if(str[3]==2 && _sessions[sessionNumber].player1_y > 0 && _sessions[sessionNumber].grid->grid[_sessions[sessionNumber].player1_y][_sessions[sessionNumber].player1_x].top == false)
+				_sessions[sessionNumber].player1_y--;
+			
+			if (str[3] == 3 && _sessions[sessionNumber].player1_x < _sessions[sessionNumber].grid->nColumns-1 && _sessions[sessionNumber].grid->grid[_sessions[sessionNumber].player1_y][_sessions[sessionNumber].player1_x].right == false)
+				_sessions[sessionNumber].player1_x++;
+			
+			if (str[3] == 4 && _sessions[sessionNumber].player1_y < _sessions[sessionNumber].grid->nRows-1 && _sessions[sessionNumber].grid->grid[_sessions[sessionNumber].player1_y+1][_sessions[sessionNumber].player1_x].top == false)
+				_sessions[sessionNumber].player1_y++;
+		}
+
+		if (player == 2)
+		{
+			if (str[3] == 1 && _sessions[sessionNumber].player2_x > 0 && _sessions[sessionNumber].grid->grid[_sessions[sessionNumber].player2_y][_sessions[sessionNumber].player2_x - 1].right == false)
+				_sessions[sessionNumber].player2_x--;
+
+			if (str[3] == 2 && _sessions[sessionNumber].player2_y > 0 && _sessions[sessionNumber].grid->grid[_sessions[sessionNumber].player2_y][_sessions[sessionNumber].player2_x].top == false)
+				_sessions[sessionNumber].player2_y--;
+
+			if (str[3] == 3 && _sessions[sessionNumber].player2_x < _sessions[sessionNumber].grid->nColumns - 1 && _sessions[sessionNumber].grid->grid[_sessions[sessionNumber].player2_y][_sessions[sessionNumber].player2_x].right == false)
+				_sessions[sessionNumber].player2_x++;
+
+			if (str[3] == 4 && _sessions[sessionNumber].player2_y < _sessions[sessionNumber].grid->nRows - 1 && _sessions[sessionNumber].grid->grid[_sessions[sessionNumber].player2_y + 1][_sessions[sessionNumber].player2_x].top == false)
+				_sessions[sessionNumber].player2_y++;
+
+		}
+
+
+		//sendMessage(_sessions[sessionNumber].player1, Event, sendCords(sessionNumber));
+		sendMessage(_sessions[sessionNumber].player2, Event, sendCords(sessionNumber));
+
+	}
+
 
 }
 
@@ -689,17 +750,5 @@ void sendMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str)
 		// Событие FD_WRITE будет отправлено, когда
 		// в буфере будет больше свободного места
 	}
-	else
-	{
-		SocketInfo->BytesSEND += SendBytes;
-
-		if (SocketInfo->BytesSEND ==
-			SocketInfo->BytesRECV)
-		{
-			SocketInfo->BytesSEND = 0;
-			SocketInfo->BytesRECV = 0;
-		}
-	}
-
 
 }

@@ -8,8 +8,6 @@ public:
 public:
 	virtual void Serialize(CArchive& ar);
 	Cell();
-protected:
-	DECLARE_SERIAL(Cell)
 };
 
 
@@ -28,6 +26,4 @@ public:
 	virtual void Serialize(CArchive& ar);
 private:
 	void GenerateLabyrynth();
-protected:
-	DECLARE_SERIAL(Grid)
 };

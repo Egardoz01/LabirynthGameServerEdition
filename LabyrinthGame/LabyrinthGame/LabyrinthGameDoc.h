@@ -12,8 +12,7 @@ public:
 	CLabyrinthGameDoc * GetDoccc();
 	CLabyrinthGameDoc() noexcept;
 	char * GameStart();
-	char * FillGrid();
-	char * SendCords(int x, int y);
+	char * SendMove(int x);
 	void handleMessage(char * str);
 	DECLARE_DYNCREATE(CLabyrinthGameDoc)
 

@@ -100,21 +100,13 @@ char* CLabyrinthGameDoc:: GameStart()
 	return kek;
 }
 
-char* CLabyrinthGameDoc::FillGrid()
-{
-	char * kek = new char[1024];
-	kek[0] = 3;//new Grid
-	return kek;
-}
-
-char* CLabyrinthGameDoc::SendCords(int x, int y)
+char* CLabyrinthGameDoc::SendMove(int x)
 {
 	char * kek = new char[1024];
 	kek[0] = 3;
 	kek[1] = sessionNumber;
 	kek[2] = player;
-	kek[3] = x;
-	kek[4] = y;
+	kek[3] = x;//1-left 2-top 3-right 4-bot
 	return kek;
 }
 
@@ -124,7 +116,6 @@ void CLabyrinthGameDoc::handleMessage(char * str)
 	{
 		sessionNumber = str[1];
 		player = str[2];
-		netHelper.Send(FillGrid());
 	}
 	if (str[0] == 4)//initializa field
 	{
@@ -148,24 +139,35 @@ void CLabyrinthGameDoc::handleMessage(char * str)
 	{
 		if (player == 1)
 		{
-			MouceCell_x = str[1];
-			MouceCell_y = str[2];
-			Enemy_x = str[3];
-			Enemy_y = str[4];
-			CheeseCell_x = str[5];
-			CheeseCell_y = str[6];
+			MouceCell_x = str[1]-1;
+			MouceCell_y = str[2]-1;
+			Enemy_x = str[3]-1;
+			Enemy_y = str[4]-1;
+			CheeseCell_x = str[5]-1;
+			CheeseCell_y = str[6]-1;
 		}
 		if (player == 2)
 		{
-			MouceCell_x = str[3];
-			MouceCell_y = str[4];
-			Enemy_x = str[1];
-			Enemy_y = str[2];
-			CheeseCell_x = str[5];
-			CheeseCell_y = str[6];
+			MouceCell_x = str[3]-1;
+			MouceCell_y = str[4]-1;
+			Enemy_x = str[1]-1;
+			Enemy_y = str[2]-1;
+			CheeseCell_x = str[5]-1;
+			CheeseCell_y = str[6]-1;
 		}
+
+		CLabyrinthGameView * curView = NULL;
+		POSITION pos = GetFirstViewPosition();
+		if (pos != NULL)
+		{
+			curView = (CLabyrinthGameView*)GetNextView(pos);
+			curView->RedrawWindow();
+		}
+		CheckForGameFinish();
 	}
 }
+
+
 
 void CLabyrinthGameDoc::StartGame()
 {
@@ -250,7 +252,8 @@ void CLabyrinthGameDoc::RightStep()
 	{
 		if (LGrid.grid[MouceCell_y][MouceCell_x].right == false)
 		{
-			MouceCell_x++;
+			netHelper.Send(SendMove(3));
+			//MouceCell_x++;
 		}
 	}
 }
@@ -261,7 +264,8 @@ void CLabyrinthGameDoc::LeftStep()
 	{
 		if (LGrid.grid[MouceCell_y][MouceCell_x - 1].right == false)
 		{
-			MouceCell_x--;
+			netHelper.Send(SendMove(1));
+			//MouceCell_x--;
 		}
 	}
 }
@@ -272,7 +276,8 @@ void CLabyrinthGameDoc::UpStep()
 	{
 		if (LGrid.grid[MouceCell_y][MouceCell_x].top == false)
 		{
-			MouceCell_y--;
+			netHelper.Send(SendMove(2));
+			//MouceCell_y--;
 		}
 	}
 }
@@ -283,7 +288,8 @@ void CLabyrinthGameDoc::DownStep()
 	{
 		if (LGrid.grid[MouceCell_y + 1][MouceCell_x].top == false)
 		{
-			MouceCell_y++;
+			netHelper.Send(SendMove(4));
+			//MouceCell_y++;
 		}
 	}
 }
@@ -303,8 +309,6 @@ CLabyrinthGameDoc::~CLabyrinthGameDoc()
 //
 //	return TRUE;
 //}
-
-
 
 
 
