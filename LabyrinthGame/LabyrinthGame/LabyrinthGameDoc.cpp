@@ -38,7 +38,11 @@ UINT ListenThread(PVOID lpParam)
 			return 0;
 
 		char* buf = pDoc->netHelper.Receive();
-		
+		if (buf != NULL &&strcmp(buf,"CLOSETHREAD")==0)
+		{
+			pDoc->FinishGame(false, false);
+			return 0;
+		}
 		if (buf != NULL)
 		{
 			pDoc->handleMessage(buf);
@@ -213,6 +217,7 @@ void CLabyrinthGameDoc::CheckForGameFinish()
 void CLabyrinthGameDoc::FinishGame(bool congrat, bool win)
 {
 	GameStarted = false;
+	WaitingForSecondPlayer = false;
 	CLabyrinthGameView * curView = NULL;
 	POSITION pos = GetFirstViewPosition();
 	LGrid.Initialize(20, 20);

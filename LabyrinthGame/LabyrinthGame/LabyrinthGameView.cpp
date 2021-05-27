@@ -417,7 +417,7 @@ void CLabyrinthGameView::OnFinishGame()
 
 void CLabyrinthGameView::OnUpdateFinishGame(CCmdUI *pCmdUI)
 {
-	pCmdUI->Enable(GetDocument()->GameStarted);
+	pCmdUI->Enable(GetDocument()->GameStarted || GetDocument()->WaitingForSecondPlayer);
 }
 
 
@@ -429,7 +429,7 @@ void CLabyrinthGameView::OnUpdateFileSave(CCmdUI *pCmdUI)
 
 void CLabyrinthGameView::OnUpdateNewGame(CCmdUI *pCmdUI)
 {
-	pCmdUI->Enable(!GetDocument()->GameStarted);
+	pCmdUI->Enable(!GetDocument()->GameStarted && !GetDocument()->WaitingForSecondPlayer);
 }
 
 

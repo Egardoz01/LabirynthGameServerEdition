@@ -114,15 +114,16 @@ char * NetHelper::Receive()
 {
 	CString str;
 	int		ret;
-	char	szBuffer[2048];
+	char*	szBuffer = new char[2048];
 	ret = recv(m_sClient, szBuffer, 2048, 0);
 	if (ret == 0)
 		return NULL;
 	if (ret == SOCKET_ERROR)
 	{
-		str.Format(_T("Failed to send"));
+		str.Format(_T("Failed to receive"));
 		AfxMessageBox(str);
-		return NULL;
+		strcpy(szBuffer, "CLOSETHREAD");
+		return szBuffer;
 	}
 	
 	return szBuffer;
