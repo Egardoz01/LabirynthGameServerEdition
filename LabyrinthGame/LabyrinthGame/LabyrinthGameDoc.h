@@ -9,11 +9,11 @@
 class CLabyrinthGameDoc : public CDocument
 {
 public:
-	CLabyrinthGameDoc * GetDoccc();
+	CLabyrinthGameDoc * GetDoc();
 	CLabyrinthGameDoc() noexcept;
-	char * GameStart();
-	char * GameFinish();
-	char * SendMove(int x);
+	char * GetMessageGameStart();
+	char * GetMessageGameFinish();
+	char * GetMessageMouseMove(int x);
 	void handleMessage(char * str);
 	DECLARE_DYNCREATE(CLabyrinthGameDoc)
 

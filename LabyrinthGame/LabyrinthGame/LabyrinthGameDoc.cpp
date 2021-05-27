@@ -33,7 +33,7 @@ UINT ListenThread(PVOID lpParam)
 
 		//handleMessage(netHelper.Receive());
 		CLabyrinthGameDoc *pDoc = NULL;
-		pDoc = pDoc->GetDoccc();
+		pDoc = pDoc->GetDoc();
 		if (pDoc->GameStarted == false && pDoc->WaitingForSecondPlayer==false)
 			return 0;
 
@@ -53,22 +53,13 @@ UINT ListenThread(PVOID lpParam)
 
 
 
-CLabyrinthGameDoc * CLabyrinthGameDoc::GetDoccc()
+CLabyrinthGameDoc * CLabyrinthGameDoc::GetDoc()
 {
 	CDocument* pDoc = NULL;
 	CWnd* pWndMain = AfxGetApp()->m_pMainWnd;
 	if (NULL != pWndMain)
 	{
-		if (pWndMain->IsKindOf(RUNTIME_CLASS(CMDIFrameWnd)))
-		{
-			// MDI application, so first we have to get the active MDI child frame.
-			CFrameWnd* pFrame = ((CMDIFrameWnd*)pWndMain)->MDIGetActive();
-			if (NULL != pFrame)
-			{
-				pDoc = pFrame->GetActiveDocument();
-			}
-		}
-		else if (pWndMain->IsKindOf(RUNTIME_CLASS(CFrameWnd)))
+		if (pWndMain->IsKindOf(RUNTIME_CLASS(CFrameWnd)))
 		{
 			CFrameWnd* aa = (CFrameWnd*)pWndMain;
 			auto view = (CLabyrinthGameView*)aa->GetActiveView();
@@ -76,7 +67,7 @@ CLabyrinthGameDoc * CLabyrinthGameDoc::GetDoccc()
 		}
 		else
 		{
-			ASSERT(FALSE); // Neither MDI nor SDI application.
+			ASSERT(FALSE);
 		}
 	}
 
@@ -101,7 +92,7 @@ CLabyrinthGameDoc::CLabyrinthGameDoc() noexcept
 	LGrid.Initialize(20, 20);
 }
 
-char* CLabyrinthGameDoc:: GameStart()
+char* CLabyrinthGameDoc:: GetMessageGameStart()
 {
 	char * kek = new char[1024];
 	kek[0] = 1;//new session
@@ -109,7 +100,7 @@ char* CLabyrinthGameDoc:: GameStart()
 }
 
 
-char* CLabyrinthGameDoc::SendMove(int x)
+char* CLabyrinthGameDoc::GetMessageMouseMove(int x)
 {
 	char * kek = new char[1024];
 	kek[0] = 3;
@@ -119,7 +110,7 @@ char* CLabyrinthGameDoc::SendMove(int x)
 	return kek;
 }
 
-char* CLabyrinthGameDoc::GameFinish()
+char* CLabyrinthGameDoc::GetMessageGameFinish()
 {
 	char * kek = new char[1024];
 	kek[0] = 5;//delete session
@@ -191,9 +182,18 @@ void CLabyrinthGameDoc::StartGame()
 {
 	if (netHelper.Connect())
 	{
-		netHelper.Send(GameStart());
+		netHelper.Send(GetMessageGameStart());
 		WaitingForSecondPlayer = true;
 		AfxBeginThread(ListenThread, NULL);
+
+		CLabyrinthGameView * curView = NULL;
+		POSITION pos = GetFirstViewPosition();
+		if (pos != NULL)
+		{
+			curView = (CLabyrinthGameView*)GetNextView(pos);
+			curView->RedrawWindow();
+
+		}
 	}
 }
 
@@ -239,7 +239,7 @@ void CLabyrinthGameDoc::FinishGame(bool congrat, bool win)
 		DoCongratulations(strCongratulations);
 	}
 
-	netHelper.Send(GameFinish());
+	netHelper.Send(GetMessageGameFinish());
 	//OnNewDocument();
 }
 
@@ -260,7 +260,7 @@ void CLabyrinthGameDoc::RightStep()
 	{
 		if (LGrid.grid[MouceCell_y][MouceCell_x].right == false)
 		{
-			netHelper.Send(SendMove(3));
+			netHelper.Send(GetMessageMouseMove(3));
 			//MouceCell_x++;
 		}
 	}
@@ -272,7 +272,7 @@ void CLabyrinthGameDoc::LeftStep()
 	{
 		if (LGrid.grid[MouceCell_y][MouceCell_x - 1].right == false)
 		{
-			netHelper.Send(SendMove(1));
+			netHelper.Send(GetMessageMouseMove(1));
 			//MouceCell_x--;
 		}
 	}
@@ -284,7 +284,7 @@ void CLabyrinthGameDoc::UpStep()
 	{
 		if (LGrid.grid[MouceCell_y][MouceCell_x].top == false)
 		{
-			netHelper.Send(SendMove(2));
+			netHelper.Send(GetMessageMouseMove(2));
 			//MouceCell_y--;
 		}
 	}
@@ -296,7 +296,7 @@ void CLabyrinthGameDoc::DownStep()
 	{
 		if (LGrid.grid[MouceCell_y + 1][MouceCell_x].top == false)
 		{
-			netHelper.Send(SendMove(4));
+			netHelper.Send(GetMessageMouseMove(4));
 			//MouceCell_y++;
 		}
 	}

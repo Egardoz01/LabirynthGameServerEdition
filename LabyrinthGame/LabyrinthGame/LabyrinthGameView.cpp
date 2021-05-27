@@ -74,7 +74,13 @@ void CLabyrinthGameView::OnDraw(CDC* pDC)
 		DrawTime(pDC);
 		DrawMouse(pDC->m_hDC);
 		DrawGrid(pDC);
-	}else
+	}else 
+	if (doc->WaitingForSecondPlayer)
+	{
+		DrawGrid(pDC);
+		DrawWaitingScreen(pDC);
+	}
+	else
 	{
 		DrawGrid(pDC);
 		DrawInitialScreen(pDC);
@@ -133,6 +139,71 @@ void CLabyrinthGameView::DrawMouse(HDC hdc)
 
 }
 
+void CLabyrinthGameView::DrawWaitingScreen(CDC * pDC)
+{
+
+	CLabyrinthGameDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if (!pDoc)
+		return;
+
+	RECT ClientRect;
+	CFont Font;
+	LOGFONT LF;
+	int LineHeight;
+	CFont *PtrOldFont;
+	int X, Y;
+
+	CFont TempFont;
+
+	//TempFont.CreateStockObject(SYSTEM_FONT);
+
+	TempFont.CreateStockObject(SYSTEM_FIXED_FONT);
+	TempFont.GetObject(sizeof(LOGFONT), &LF);
+
+	LF.lfCharSet = RUSSIAN_CHARSET; //RUSSIAN_CHARSET
+	//LF.lfWeight = FW_BOLD;
+
+	//LF.lfItalic = 1;
+
+	//LF.lfUnderline = 1;
+
+
+	Font.CreateFontIndirect(&LF);
+	PtrOldFont = pDC->SelectObject(&Font);
+
+	GetClientRect(&ClientRect);
+
+	pDC->SetTextAlign(TA_CENTER);
+	X = (ClientRect.left + ClientRect.right) / 2;
+
+	// установка цвета текста и режима фона:
+	pDC->SetTextColor(::GetSysColor(COLOR_WINDOWTEXT));
+	pDC->SetBkMode(TRANSPARENT);
+
+	// вывод строк текста:
+	LineHeight = LF.lfHeight;
+	Y = (ClientRect.top + ClientRect.bottom) / 2 - 50;
+
+	CRect rect(X - 200, Y - 50, X + 200, Y + 80);
+	pDC->Rectangle(rect);
+
+	CBrush brush;
+	brush.CreateSolidBrush(RGB(210, 210, 210));
+	pDC->FillRect(&rect, &brush);
+
+
+	pDC->TextOut(X, Y, L"Вы находитесь в очереди на игру.");
+	Y += LineHeight;
+	pDC->TextOut(X, Y, _T("Подождите, пока кто-нибудь подключится,"));
+	Y += LineHeight;
+	pDC->TextOut(X, Y, _T("чтобы с вами поиграть."));
+
+
+	// отмена выбора шрифта:
+	pDC->SelectObject(PtrOldFont);
+}
+
 void CLabyrinthGameView::DrawInitialScreen(CDC * pDC)
 {
 	CLabyrinthGameDoc* pDoc = GetDocument();
@@ -188,11 +259,9 @@ void CLabyrinthGameView::DrawInitialScreen(CDC * pDC)
 
 	pDC->TextOut(X, Y, L"Добро пожаловать в ИГРУ!!!!");
 	Y += LineHeight;
-	pDC->TextOut(X, Y,_T("Помогите маленькому МЫШу, выбраться из DUNGEON"));
+	pDC->TextOut(X, Y,_T("Начните новую игру, "));
 	Y += LineHeight;
-	pDC->TextOut(X, Y,_T("Для этого, ему нужно залутать здоровый кусок СЫРа."));
-	Y += LineHeight;
-	pDC->TextOut(X, Y, _T("Только тогда, он сможет выбраться из DUNGEON"));
+	pDC->TextOut(X, Y,_T("Чтобы зарубиться в жестокой битве за кусок сыра"));
 
 	
 

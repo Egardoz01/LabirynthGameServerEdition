@@ -60,6 +60,7 @@ private:
 	void DrawGrid(CDC* pDC);
 	void DrawTime(CDC* pDC);
 	void DrawMouse(HDC hdc);
+	void DrawWaitingScreen(CDC * pDC);
 	void DrawInitialScreen(CDC* pDC);
 	void ResizeWindowForGame();
 	void ResizeWindowForWaiting();
