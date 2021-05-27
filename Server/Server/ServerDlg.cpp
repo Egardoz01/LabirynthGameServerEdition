@@ -646,7 +646,7 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 {
 	if (str[0] == 1)//Starting session
 	{
-		if (queue == NULL && false)
+		if (queue == NULL)
 		{
 			queue = SocketInfo;
 		}
@@ -655,17 +655,17 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 
 			
 			int sessionNumber = sessionNum++;
-			//_sessions[sessionNumber.player1 = queue;
+			_sessions[sessionNumber].player1 = queue;
 			_sessions[sessionNumber].player2 = SocketInfo;
 			queue = NULL;
-			//sendMessage(_sessions[sessionNumber.player1, Event, newSession(1,sessionNumber));
+			sendMessage(_sessions[sessionNumber].player1, Event, newSession(1,sessionNumber));
 			sendMessage(_sessions[sessionNumber].player2, Event, newSession(2, sessionNumber));
 			Sleep(100);
 			char * mess = fillGrid(sessionNumber);
-			//sendMessage(_sessions[sessionNumber.player1, Event, mess);
+			sendMessage(_sessions[sessionNumber].player1, Event, mess);
 			sendMessage(_sessions[sessionNumber].player2, Event, mess);
 			Sleep(100);
-			//sendMessage(_sessions[sessionNumber].player1, Event, sendCords(sessionNumber));
+			sendMessage(_sessions[sessionNumber].player1, Event, sendCords(sessionNumber));
 			sendMessage(_sessions[sessionNumber].player2, Event, sendCords(sessionNumber));
 			Sleep(100);
 			
@@ -708,7 +708,7 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 		}
 
 
-		//sendMessage(_sessions[sessionNumber].player1, Event, sendCords(sessionNumber));
+		sendMessage(_sessions[sessionNumber].player1, Event, sendCords(sessionNumber));
 		sendMessage(_sessions[sessionNumber].player2, Event, sendCords(sessionNumber));
 
 	}
