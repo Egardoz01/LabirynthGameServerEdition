@@ -21,7 +21,9 @@ public:
 public:
 	int sessionNumber;
 	int player;
-
+	CString server;
+	int port;
+	CString playerName;
 
 	Grid LGrid;
 	NetHelper netHelper;

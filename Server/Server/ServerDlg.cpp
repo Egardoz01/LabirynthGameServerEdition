@@ -229,7 +229,7 @@ void CServerDlg::OnBnClickedStart()
 
 void CServerDlg::OnBnClickedStop()
 {
-
+	exit(0);
 }
 
 UINT ListenThread(PVOID lpParam)

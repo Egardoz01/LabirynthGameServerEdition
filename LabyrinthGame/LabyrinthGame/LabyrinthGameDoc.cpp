@@ -87,6 +87,9 @@ END_MESSAGE_MAP()
 
 CLabyrinthGameDoc::CLabyrinthGameDoc() noexcept
 {
+	playerName = "BIBA";
+	port = 5150;
+	server = "localhost";
 
 	GameStarted = false;
 	LGrid.Initialize(20, 20);
@@ -180,7 +183,7 @@ void CLabyrinthGameDoc::handleMessage(char * str)
 
 void CLabyrinthGameDoc::StartGame()
 {
-	if (netHelper.Connect())
+	if (netHelper.Connect(server,port))
 	{
 		netHelper.Send(GetMessageGameStart());
 		WaitingForSecondPlayer = true;

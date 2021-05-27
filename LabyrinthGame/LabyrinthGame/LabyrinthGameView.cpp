@@ -11,6 +11,7 @@
 
 #include "LabyrinthGameDoc.h"
 #include "LabyrinthGameView.h"
+#include "OptionsDialog.h"
 #include <winsock2.h>
 
 #ifdef _DEBUG
@@ -32,6 +33,7 @@ BEGIN_MESSAGE_MAP(CLabyrinthGameView, CView)
 	ON_UPDATE_COMMAND_UI(ID_NEW_GAME, &CLabyrinthGameView::OnUpdateNewGame)
 //	ON_UPDATE_COMMAND_UI(ID_FILE_OPEN, &CLabyrinthGameView::OnUpdateFileOpen)
 ON_UPDATE_COMMAND_UI(ID_FILE_OPEN, &CLabyrinthGameView::OnUpdateFileOpen)
+ON_COMMAND(ID_OPTIONS, &CLabyrinthGameView::OnOptions)
 END_MESSAGE_MAP()
 
 
@@ -507,4 +509,21 @@ void CLabyrinthGameView::OnUpdateNewGame(CCmdUI *pCmdUI)
 void CLabyrinthGameView::OnUpdateFileOpen(CCmdUI *pCmdUI)
 {
 	pCmdUI->Enable(!GetDocument()->GameStarted);
+}
+
+
+void CLabyrinthGameView::OnOptions()
+{
+	OptionsDialog dlg;
+	dlg.name = GetDocument()->playerName;
+	dlg.port = GetDocument()->port;
+	dlg.server = GetDocument()->server;
+	dlg.DoModal();
+	if (dlg.OK)
+	{
+		GetDocument()->playerName = dlg.name;
+		GetDocument()->server = dlg.server;
+		GetDocument()->port = dlg.port;
+	}
+
 }

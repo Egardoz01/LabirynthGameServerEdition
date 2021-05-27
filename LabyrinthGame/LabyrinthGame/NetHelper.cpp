@@ -2,7 +2,7 @@
 #include "NetHelper.h"
 #include <winsock2.h>
 
-bool NetHelper::Connect()
+bool NetHelper::Connect(CString serverStr, int port)
 {
 	char szServer[128];	// Имя или IP-адрес сервера
 	int	iPort;			// Порт
@@ -15,9 +15,9 @@ bool NetHelper::Connect()
 	CString str;
 
 
-	iPort = 5150;
+	iPort = port;
 	
-	strcpy_s(szServer, "localhost");
+	sprintf(szServer, "%S", serverStr);
 	if (WSAStartup(MAKEWORD(2, 2), &wsd) != 0)
 	{
 		AfxMessageBox((LPTSTR)"Failed to load Winsock library!"); //((LPTSTR));
