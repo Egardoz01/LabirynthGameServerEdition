@@ -132,7 +132,7 @@ void CLabyrinthGameDoc::handleMessage(char * str)
 		int nColumns = str[2];
 		char *buff;
 		buff = str+3;
-		LGrid.FillGrid(nRows, nColumns,str);
+		LGrid.FillGrid(nRows, nColumns,buff);
 		GameStarted = true;
 		CLabyrinthGameView * curView = NULL;
 		POSITION pos = GetFirstViewPosition();

@@ -21,12 +21,12 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// Dialog Data
+	// Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 // Implementation
@@ -79,6 +79,21 @@ void handleMessage(LPSOCKET_INFORMATION soket, DWORD Event, char *str, int len);
 
 void sendMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str);
 
+struct SessionInfo {
+	LPSOCKET_INFORMATION player1;
+	LPSOCKET_INFORMATION player2;
+	int player1_x;
+	int player1_y;
+	int player2_x;
+	int player2_y;
+	int cheese_x;
+	int cheese_y;
+	Grid* grid;
+};
+
+SessionInfo _sessions[256];
+int sessionNum = 1;
+LPSOCKET_INFORMATION queue = NULL;
 
 CServerDlg::CServerDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SERVER_DIALOG, pParent)
@@ -213,7 +228,7 @@ void CServerDlg::OnBnClickedStart()
 
 void CServerDlg::OnBnClickedStop()
 {
-	
+
 }
 
 UINT ListenThread(PVOID lpParam)
@@ -419,7 +434,7 @@ UINT ListenThread(PVOID lpParam)
 
 
 
-			
+
 
 					unsigned l = sizeof(Str) - 1;
 					if (l > RecvBytes) l = RecvBytes;
@@ -428,7 +443,7 @@ UINT ListenThread(PVOID lpParam)
 					pLB->AddString(Str);
 
 
-					handleMessage(SocketInfo,Event, SocketInfo->Buffer, l);
+					handleMessage(SocketInfo, Event, SocketInfo->Buffer, l);
 				}
 			}
 
@@ -493,8 +508,8 @@ UINT ListenThread(PVOID lpParam)
 			FreeSocketInformation(Event - WSA_WAIT_EVENT_0,
 				Str, pLB);
 		}
-   } // while
-   return 0;
+	} // while
+	return 0;
 }
 
 BOOL CreateSocketInformation(SOCKET s, char *Str,
@@ -553,49 +568,62 @@ void FreeSocketInformation(DWORD Event, char *Str,
 	EventTotal--;
 }
 
-char *newSession()
+char *newSession(int player, int sessionNumber)
 {
 	char *str = new char[1024];
 	str[0] = 2;//new session
-	str[1] = 1;//session number
+	str[1] = sessionNumber;//session number
+	str[2] = player;//player number
 	return str;
 }
 
 
-char *fillGrid()
+char *fillGrid(int sessionNumber)
 {
 	char *str = new char[1024];
 	str[0] = 4;//new Grid
-	
-	Grid grid;
-	grid.Initialize(20, 20);
-	str[1] = grid.nRows;
-	str[2] = grid.nColumns;
+
+	Grid* grid = new Grid();
+	grid->Initialize(10, 10);
+	str[1] = grid->nRows;
+	str[2] = grid->nColumns;
 	int next = 3;
-	for(int i=0; i<grid.nRows; i++)
-		for (int j = 0; j < grid.nColumns; j++)
+	for (int i = 0; i < grid->nRows; i++)
+		for (int j = 0; j < grid->nColumns; j++)
 		{
-			if (grid.grid[i][j].top == false && grid.grid[i][j].right == false)
+			if (grid->grid[i][j].top == false && grid->grid[i][j].right == false)
 			{
 				str[next++] = 1;
 			}
 
-			if (grid.grid[i][j].top == false && grid.grid[i][j].right == true)
+			if (grid->grid[i][j].top == false && grid->grid[i][j].right == true)
 			{
 				str[next++] = 2;
 			}
 
-			if (grid.grid[i][j].top == true && grid.grid[i][j].right == false)
+			if (grid->grid[i][j].top == true && grid->grid[i][j].right == false)
 			{
 				str[next++] = 3;
 			}
 
-			if (grid.grid[i][j].top == true && grid.grid[i][j].right == true)
+			if (grid->grid[i][j].top == true && grid->grid[i][j].right == true)
 			{
 				str[next++] = 4;
 			}
 		}
 
+
+	_sessions[sessionNumber].grid = grid;
+
+	_sessions[sessionNumber].player1_x = 0;
+	_sessions[sessionNumber].player1_y = 0;
+
+
+	_sessions[sessionNumber].player2_x = grid->nRows - 1;
+	_sessions[sessionNumber].player2_y = grid->nColumns - 1;
+
+	_sessions[sessionNumber].cheese_x = grid->nRows / 2;
+	_sessions[sessionNumber].cheese_y = grid->nColumns / 2;
 
 	return str;
 }
@@ -604,12 +632,27 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 {
 	if (str[0] == 1)//Starting session
 	{
-		sendMessage(SocketInfo, Event, newSession());
+		if (queue == NULL && false)
+		{
+			queue = SocketInfo;
+		}
+		else
+		{
+			//sendMessage(queue, Event, newSession(1,sessionNum));
+			sendMessage(SocketInfo, Event, newSession(2, sessionNum));
+			_sessions[sessionNum].player1 = queue;
+			_sessions[sessionNum].player2 = SocketInfo;
+
+			char * mess = fillGrid(sessionNum);
+			//sendMessage(queue, Event, mess);
+			sendMessage(SocketInfo, Event, mess);
+
+
+			queue = NULL;
+			sessionNum++;
+		}
 	}
-	if (str[0] == 3)//Filling grid
-	{
-		sendMessage(SocketInfo, Event, fillGrid());
-	}
+
 }
 
 
