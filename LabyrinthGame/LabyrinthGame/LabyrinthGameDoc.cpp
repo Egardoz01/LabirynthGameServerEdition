@@ -99,6 +99,9 @@ char* CLabyrinthGameDoc:: GetMessageGameStart()
 {
 	char * kek = new char[1024];
 	kek[0] = 1;//new session
+	kek[1] = playerName.GetLength();
+	for (int i = 0; i < playerName.GetLength(); i++)
+		kek[i + 2] = playerName[i];
 	return kek;
 }
 
@@ -132,9 +135,28 @@ void CLabyrinthGameDoc::handleMessage(char * str)
 	{
 		int nRows = str[1];
 		int nColumns = str[2];
-		char *buff;
+		char *buff, *names;
 		buff = str+3;
+		names = buff + nRows * nColumns;
 		LGrid.FillGrid(nRows, nColumns,buff);
+		char *name1 = names + 1;
+		int len1 = names[0];
+		char *name2 = name1 + len1;
+		
+		player1Name = new char[len1 +1];
+		for (int i = 0; i < len1; i++)
+			player1Name[i] = name1[i];
+		player1Name[len1] = 0;
+
+
+		int len2 = name2[0];
+		player2Name = new char[len2+1];
+		name2 = name2 + 1;
+		for (int i = 0; i < len2; i++)
+			player2Name[i] = name2[i];
+
+		player2Name[len2] = 0;
+	
 		GameStarted = true;
 		WaitingForSecondPlayer = false;
 		CLabyrinthGameView * curView = NULL;

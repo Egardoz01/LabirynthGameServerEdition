@@ -25,6 +25,8 @@ public:
 	int port;
 	CString playerName;
 
+	char* player1Name;
+	char* player2Name;
 	Grid LGrid;
 	NetHelper netHelper;
 	int MouceCell_x;

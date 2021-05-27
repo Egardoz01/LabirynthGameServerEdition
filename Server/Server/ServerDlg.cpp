@@ -88,6 +88,8 @@ struct SessionInfo {
 	int player2_y;
 	int cheese_x;
 	int cheese_y;
+	char* player1Name;
+	char* player2Name;
 	Grid* grid;
 };
 
@@ -95,6 +97,7 @@ int const  MAX_SESSIONS = 256;
 SessionInfo _sessions[MAX_SESSIONS];
 int sessionNum = 1;
 LPSOCKET_INFORMATION queue = NULL;
+char queueName[100];
 
 CServerDlg::CServerDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SERVER_DIALOG, pParent)
@@ -613,6 +616,14 @@ char *fillGrid(int sessionNumber)
 		}
 
 
+	str[next++] = strlen(_sessions[sessionNumber].player1Name);
+	for (int i = 0; i < strlen(_sessions[sessionNumber].player1Name); i++)
+		str[next++] = _sessions[sessionNumber].player1Name[i];
+
+	str[next++] = strlen(_sessions[sessionNumber].player2Name);
+	for (int i = 0; i < strlen(_sessions[sessionNumber].player2Name); i++)
+		str[next++] = _sessions[sessionNumber].player2Name[i];
+
 	_sessions[sessionNumber].grid = grid;
 
 	_sessions[sessionNumber].player1_x = 0;
@@ -650,6 +661,10 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 		if (queue == NULL)
 		{
 			queue = SocketInfo;
+			for (int i = 0; i < 100; i++)
+				queueName[i] = 0;
+			for (int i = 0; i < str[1]; i++)
+				queueName[i] = str[2 + i];
 		}
 		else
 		{
@@ -660,6 +675,23 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 				sessionNum = 1;
 			_sessions[sessionNumber].player1 = queue;
 			_sessions[sessionNumber].player2 = SocketInfo;
+			
+			_sessions[sessionNumber].player1Name = new char[100];
+			_sessions[sessionNumber].player2Name = new char[100];
+
+			char* p2Name = str + 2;
+
+			for (int i = 0; i < strlen(queueName); i++)
+			{
+				_sessions[sessionNumber].player1Name[i] = queueName[i];
+			}
+			_sessions[sessionNumber].player1Name[strlen(queueName)] = 0;
+			for (int i = 0; i < str[1]; i++)
+			{
+				_sessions[sessionNumber].player2Name[i] = p2Name[i];
+			}
+			_sessions[sessionNumber].player2Name[str[1]] = 0;
+
 			queue = NULL;
 			sendMessage(_sessions[sessionNumber].player1, Event, newSession(1,sessionNumber));
 			sendMessage(_sessions[sessionNumber].player2, Event, newSession(2, sessionNumber));
