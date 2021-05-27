@@ -49,13 +49,11 @@ public:
 public:
 	void StartGame();
 	void FinishGame(bool congrat);
-	CLabyrinthGameDoc & GetDoc();
 	void DoCongratulations(CString text);
 	void CheckForGameFinish();
 	void RightStep();
 	void LeftStep();
 	void UpStep();
-	void LoadGame();
 	void DownStep();
 	virtual ~CLabyrinthGameDoc();
 	//CLabyrinthGameView* GetView()  const; //почему-то студия не хочет делать такой метод

@@ -1,17 +1,16 @@
 #pragma once
 
-class Cell : public CObject
+class Cell
 {
 public:
 	bool top;
 	bool right;
 public:
-	virtual void Serialize(CArchive& ar);
 	Cell();
 };
 
 
-class Grid : public CObject
+class Grid
 {
 public:
 	Cell **grid;
@@ -23,7 +22,6 @@ public:
 	void FillGrid(int _nRows, int _nColumns, char * str);
 	void ClearGrid();
 	Grid();
-	virtual void Serialize(CArchive& ar);
 private:
 	void GenerateLabyrynth();
 };

@@ -320,17 +320,6 @@ void CLabyrinthGameDoc::Serialize(CArchive& ar)
 }
 
 
-void CLabyrinthGameDoc::LoadGame()
-{
-	GameStarted = true;
-	CLabyrinthGameView * curView = NULL;
-	POSITION pos = GetFirstViewPosition();
-	if (pos != NULL)
-	{
-		curView = (CLabyrinthGameView*)GetNextView(pos);
-		curView->OnNewGame();
-	}
-}
 
 
 #ifdef SHARED_HANDLERS

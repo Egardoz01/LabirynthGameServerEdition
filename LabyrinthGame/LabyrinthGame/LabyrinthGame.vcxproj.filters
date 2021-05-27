@@ -98,5 +98,8 @@
     <Image Include="congratulations.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="enemy.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

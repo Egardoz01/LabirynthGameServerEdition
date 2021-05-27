@@ -19,11 +19,14 @@ private:
 	int mouse_y;
 	int cheese_x;
 	int cheese_y;
+	int enemy_x;
+	int enemy_y;
 
 	int cellHeight;
 	int cellWidth;
 	HBITMAP hBitmapMouse;
 	HBITMAP hBitmapCheese;
+	HBITMAP hBitmapEnemy;
 	CPoint sPoint;
 	UINT_PTR mainTimer;
 

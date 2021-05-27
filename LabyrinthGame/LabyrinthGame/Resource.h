@@ -28,6 +28,7 @@
 #define IDB_BITMAP7                     331
 #define IDB_BITMAP8                     332
 #define IDB_BITMAP9                     333
+#define IDB_BITMAP10                    334
 #define IDC_CongratText                 1000
 #define IDC_RADIO3                      1005
 #define ID_FILE_32771                   32771
@@ -39,7 +40,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        334
+#define _APS_NEXT_RESOURCE_VALUE        335
 #define _APS_NEXT_COMMAND_VALUE         32775
 #define _APS_NEXT_CONTROL_VALUE         1007
 #define _APS_NEXT_SYMED_VALUE           310

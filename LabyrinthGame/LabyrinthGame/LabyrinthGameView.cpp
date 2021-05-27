@@ -119,6 +119,18 @@ void CLabyrinthGameView::DrawMouse(HDC hdc)
 	SelectObject(hdcMem, oldBitmap);
 	DeleteDC(hdcMem);
 
+
+	enemy_x = sPoint.x + 5 + doc->Enemy_x*cellWidth;
+	enemy_y = sPoint.y + 5 + doc->Enemy_y*cellHeight;
+
+	hdcMem = CreateCompatibleDC(hdc);
+	oldBitmap = SelectObject(hdcMem, hBitmapEnemy);
+	GetObject(hBitmapEnemy, sizeof(bitmap), &bitmap);
+	BitBlt(hdc, enemy_x, enemy_y, bitmap.bmWidth, bitmap.bmHeight, hdcMem, 0, 0, SRCCOPY);
+	SelectObject(hdcMem, oldBitmap);
+	DeleteDC(hdcMem);
+
+
 }
 
 void CLabyrinthGameView::DrawInitialScreen(CDC * pDC)
@@ -378,6 +390,7 @@ void CLabyrinthGameView::StartGame()
 
 	hBitmapMouse = (HBITMAP)LoadImage(NULL, L"mouse.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	hBitmapCheese = (HBITMAP)LoadImage(NULL, L"cheese.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	hBitmapEnemy = (HBITMAP)LoadImage(NULL, L"enemy.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
 	ResizeWindowForGame();
 
