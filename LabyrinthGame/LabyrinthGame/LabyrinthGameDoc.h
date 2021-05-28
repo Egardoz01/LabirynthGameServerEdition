@@ -13,6 +13,9 @@ public:
 	CLabyrinthGameDoc() noexcept;
 	char * GetMessageGameStart();
 	char * GetMessageGameFinish();
+	int handleGameStart(char * str);
+	int  handleFillGrid(char * str);
+	int handleMousePosition(char * str);
 	char * GetMessageMouseMove(int x);
 	void handleMessage(char * str);
 	DECLARE_DYNCREATE(CLabyrinthGameDoc)

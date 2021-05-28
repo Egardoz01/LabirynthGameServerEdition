@@ -123,42 +123,80 @@ char* CLabyrinthGameDoc::GetMessageGameFinish()
 	return kek;
 }
 
+int CLabyrinthGameDoc::handleGameStart(char * str)
+{
+	sessionNumber = str[1];
+	player = str[2];
+	return 3;
+}
+
+int CLabyrinthGameDoc::handleFillGrid(char * str)
+{
+	int nRows = str[1];
+	int nColumns = str[2];
+	char *buff, *names;
+	buff = str + 3;
+	names = buff + nRows * nColumns;
+	LGrid.FillGrid(nRows, nColumns, buff);
+	char *name1 = names + 1;
+	int len1 = names[0];
+	char *name2 = name1 + len1;
+
+	player1Name = new char[len1 + 1];
+	for (int i = 0; i < len1; i++)
+		player1Name[i] = name1[i];
+	player1Name[len1] = 0;
+
+
+	int len2 = name2[0];
+	player2Name = new char[len2 + 1];
+	name2 = name2 + 1;
+	for (int i = 0; i < len2; i++)
+		player2Name[i] = name2[i];
+
+	player2Name[len2] = 0;
+
+	GameStarted = true;
+	WaitingForSecondPlayer = false;
+
+
+	return 3 + nRows * nColumns + 2 + len1 + len2;
+}
+
+int CLabyrinthGameDoc::handleMousePosition(char * str)
+{
+	if (player == 1)
+	{
+		MouceCell_x = str[1] - 1;
+		MouceCell_y = str[2] - 1;
+		Enemy_x = str[3] - 1;
+		Enemy_y = str[4] - 1;
+		CheeseCell_x = str[5] - 1;
+		CheeseCell_y = str[6] - 1;
+	}
+	if (player == 2)
+	{
+		MouceCell_x = str[3] - 1;
+		MouceCell_y = str[4] - 1;
+		Enemy_x = str[1] - 1;
+		Enemy_y = str[2] - 1;
+		CheeseCell_x = str[5] - 1;
+		CheeseCell_y = str[6] - 1;
+	}
+
+		
+	return 7;
+}
 
 void CLabyrinthGameDoc::handleMessage(char * str)
 {
 	if (str[0] == 2)//new session
 	{
-		sessionNumber = str[1];
-		player = str[2];
-	}
-	if (str[0] == 4)//initializa field
-	{
-		int nRows = str[1];
-		int nColumns = str[2];
-		char *buff, *names;
-		buff = str+3;
-		names = buff + nRows * nColumns;
-		LGrid.FillGrid(nRows, nColumns,buff);
-		char *name1 = names + 1;
-		int len1 = names[0];
-		char *name2 = name1 + len1;
-		
-		player1Name = new char[len1 +1];
-		for (int i = 0; i < len1; i++)
-			player1Name[i] = name1[i];
-		player1Name[len1] = 0;
+		int off = 0;
+		off+=handleGameStart(str);
+		off+=handleFillGrid(str+off);
+		handleMousePosition(str+off);
 
-
-		int len2 = name2[0];
-		player2Name = new char[len2+1];
-		name2 = name2 + 1;
-		for (int i = 0; i < len2; i++)
-			player2Name[i] = name2[i];
-
-		player2Name[len2] = 0;
-	
-		GameStarted = true;
-		WaitingForSecondPlayer = false;
 		CLabyrinthGameView * curView = NULL;
 		POSITION pos = GetFirstViewPosition();
 		if (pos != NULL)
@@ -166,29 +204,12 @@ void CLabyrinthGameDoc::handleMessage(char * str)
 			curView = (CLabyrinthGameView*)GetNextView(pos);
 			curView->StartGame();
 		}
-
-
 	}
+	
 	if (str[0] == 6)//mouses Positions
 	{
-		if (player == 1)
-		{
-			MouceCell_x = str[1]-1;
-			MouceCell_y = str[2]-1;
-			Enemy_x = str[3]-1;
-			Enemy_y = str[4]-1;
-			CheeseCell_x = str[5]-1;
-			CheeseCell_y = str[6]-1;
-		}
-		if (player == 2)
-		{
-			MouceCell_x = str[3]-1;
-			MouceCell_y = str[4]-1;
-			Enemy_x = str[1]-1;
-			Enemy_y = str[2]-1;
-			CheeseCell_x = str[5]-1;
-			CheeseCell_y = str[6]-1;
-		}
+		
+		handleMousePosition(str);
 
 		CLabyrinthGameView * curView = NULL;
 		POSITION pos = GetFirstViewPosition();
@@ -199,8 +220,9 @@ void CLabyrinthGameDoc::handleMessage(char * str)
 		}
 		CheckForGameFinish();
 
-		delete str;
 	}
+
+	delete str;
 }
 
 
@@ -209,10 +231,6 @@ void CLabyrinthGameDoc::StartGame()
 {
 	if (netHelper.Connect(server,port))
 	{
-		netHelper.Send(GetMessageGameStart());
-		WaitingForSecondPlayer = true;
-		AfxBeginThread(ListenThread, NULL);
-
 		CLabyrinthGameView * curView = NULL;
 		POSITION pos = GetFirstViewPosition();
 		if (pos != NULL)
@@ -221,6 +239,12 @@ void CLabyrinthGameDoc::StartGame()
 			curView->RedrawWindow();
 
 		}
+		Sleep(1000);
+		netHelper.Send(GetMessageGameStart());
+		WaitingForSecondPlayer = true;
+		AfxBeginThread(ListenThread, NULL);
+
+		
 	}
 }
 
