@@ -198,6 +198,8 @@ void CLabyrinthGameDoc::handleMessage(char * str)
 			curView->RedrawWindow();
 		}
 		CheckForGameFinish();
+
+		delete str;
 	}
 }
 

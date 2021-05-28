@@ -108,6 +108,8 @@ void NetHelper::Send(char *szMessage)
 		AfxMessageBox(str);
 		return;
 	}
+
+	delete szMessage;
 }
 
 char * NetHelper::Receive()

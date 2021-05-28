@@ -77,11 +77,11 @@ UINT ListenThread(PVOID lpParam);
 
 void handleMessage(LPSOCKET_INFORMATION soket, DWORD Event, char *str, int len);
 
-void sendMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str);
+void sendMessage(DWORD Event, char *str);
 
 struct SessionInfo {
-	LPSOCKET_INFORMATION player1;
-	LPSOCKET_INFORMATION player2;
+	DWORD player1Event;
+	DWORD player2Event;
 	int player1_x;
 	int player1_y;
 	int player2_x;
@@ -94,9 +94,10 @@ struct SessionInfo {
 };
 
 int const  MAX_SESSIONS = 256;
+int const MESSAGE_SIZE = 1024;
 SessionInfo _sessions[MAX_SESSIONS];
 int sessionNum = 1;
-LPSOCKET_INFORMATION queue = NULL;
+DWORD queue = 0;
 char queueName[100];
 
 CServerDlg::CServerDlg(CWnd* pParent /*=nullptr*/)
@@ -555,11 +556,12 @@ void FreeSocketInformation(DWORD Event, char *Str,
 {
 	LPSOCKET_INFORMATION SI = SocketArray[Event];
 	DWORD i;
-
-	closesocket(SI->Socket);
-	GlobalFree(SI);
-	WSACloseEvent(EventArray[Event]);
-
+	if (SI != NULL)
+	{
+		closesocket(SI->Socket);
+		GlobalFree(SI);
+		WSACloseEvent(EventArray[Event]);
+	}
 	// Сжатие массивов сокетов и событий
 
 	for (i = Event; i < EventTotal; i++)
@@ -573,7 +575,7 @@ void FreeSocketInformation(DWORD Event, char *Str,
 
 char *newSession(int player, int sessionNumber)
 {
-	char *str = new char[1024];
+	char *str = new char[MESSAGE_SIZE];
 	str[0] = 2;//new session
 	str[1] = sessionNumber;//session number
 	str[2] = player;//player number
@@ -583,7 +585,7 @@ char *newSession(int player, int sessionNumber)
 
 char *fillGrid(int sessionNumber)
 {
-	char *str = new char[1024];
+	char *str = new char[MESSAGE_SIZE];
 	str[0] = 4;//new Grid
 
 	Grid* grid = new Grid();
@@ -642,7 +644,7 @@ char *fillGrid(int sessionNumber)
 
 char *sendCords(int sessionNumber)
 {
-	char *str = new char[1024];
+	char *str = new char[MESSAGE_SIZE];
 	str[0] = 6;//new cords
 	str[1] = _sessions[sessionNumber].player1_x+1;
 	str[2] = _sessions[sessionNumber].player1_y+1;
@@ -658,9 +660,9 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 {
 	if (str[0] == 1)//Starting session
 	{
-		if (queue == NULL)
+		if (queue == 0)
 		{
-			queue = SocketInfo;
+			queue = Event;
 			for (int i = 0; i < 100; i++)
 				queueName[i] = 0;
 			for (int i = 0; i < str[1]; i++)
@@ -673,8 +675,8 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 			int sessionNumber = sessionNum++;
 			if (sessionNum >= MAX_SESSIONS)
 				sessionNum = 1;
-			_sessions[sessionNumber].player1 = queue;
-			_sessions[sessionNumber].player2 = SocketInfo;
+			_sessions[sessionNumber].player1Event = queue;
+			_sessions[sessionNumber].player2Event = Event;
 			
 			_sessions[sessionNumber].player1Name = new char[100];
 			_sessions[sessionNumber].player2Name = new char[100];
@@ -692,17 +694,28 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 			}
 			_sessions[sessionNumber].player2Name[str[1]] = 0;
 
-			queue = NULL;
-			sendMessage(_sessions[sessionNumber].player1, Event, newSession(1,sessionNumber));
-			sendMessage(_sessions[sessionNumber].player2, Event, newSession(2, sessionNumber));
+			queue = 0;
+
+			char* mess1 = newSession(1, sessionNumber);
+			sendMessage(_sessions[sessionNumber].player1Event, mess1);
+			delete mess1;
+
+			char* mess2 = newSession(2, sessionNumber);
+			sendMessage(_sessions[sessionNumber].player2Event, mess2);
+			delete mess2;
+
 			Sleep(100);
-			char * mess = fillGrid(sessionNumber);
-			sendMessage(_sessions[sessionNumber].player1, Event, mess);
-			sendMessage(_sessions[sessionNumber].player2, Event, mess);
+
+			char * mess3 = fillGrid(sessionNumber);
+			sendMessage(_sessions[sessionNumber].player1Event, mess3);
+			sendMessage(_sessions[sessionNumber].player2Event, mess3);
+			delete mess3;
+
 			Sleep(100);
-			sendMessage(_sessions[sessionNumber].player1, Event, sendCords(sessionNumber));
-			sendMessage(_sessions[sessionNumber].player2, Event, sendCords(sessionNumber));
-			Sleep(100);
+			char * mess4 = sendCords(sessionNumber);
+			sendMessage(_sessions[sessionNumber].player1Event, mess4);
+			sendMessage(_sessions[sessionNumber].player2Event, mess4);
+			delete mess4;
 			
 		}
 	}
@@ -743,8 +756,10 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 		}
 
 
-		sendMessage(_sessions[sessionNumber].player1, Event, sendCords(sessionNumber));
-		sendMessage(_sessions[sessionNumber].player2, Event, sendCords(sessionNumber));
+		char * mess4 = sendCords(sessionNumber);
+		sendMessage(_sessions[sessionNumber].player1Event, mess4);
+		sendMessage(_sessions[sessionNumber].player2Event, mess4);
+		delete mess4;
 
 	}
 
@@ -764,12 +779,17 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 
 
 
-void sendMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str)
+void sendMessage(DWORD Event, char *str)
 {
 	DWORD SendBytes;
 	char  Str[200];
 	CListBox  *pLB =
 		(CListBox *)(CListBox::FromHandle(hWnd_LB));
+
+	LPSOCKET_INFORMATION SocketInfo = SocketArray[Event];
+
+	if (SocketInfo == NULL)
+		return;
 
 	SocketInfo->DataBuf.buf = str;
 	SocketInfo->DataBuf.len = strlen(str);
