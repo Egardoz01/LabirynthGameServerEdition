@@ -239,7 +239,7 @@ void CLabyrinthGameDoc::StartGame()
 			curView->RedrawWindow();
 
 		}
-		Sleep(1000);
+		//Sleep(1000);
 		netHelper.Send(GetMessageGameStart());
 		WaitingForSecondPlayer = true;
 		AfxBeginThread(ListenThread, NULL);
