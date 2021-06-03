@@ -73,7 +73,6 @@ void CLabyrinthGameView::OnDraw(CDC* pDC)
 
 	if (doc->GameStarted)
 	{
-		DrawTime(pDC);
 		DrawNames(pDC);
 		DrawMouse(pDC->m_hDC);
 		DrawGrid(pDC);
@@ -315,16 +314,7 @@ void CLabyrinthGameView::DrawGrid(CDC* pDC)
 	}
 }
 
-void CLabyrinthGameView::DrawTime(CDC * pDC)
-{
-	CLabyrinthGameDoc* doc = GetDocument();
-	RECT rect;
-	rect.left = 5;
-	rect.top = 5;
-	CString strTime;
-	strTime.Format(_T("Текущее время %d%d:%d%d"), ((doc->CurSeconds / 600) % 10), ((doc->CurSeconds / 60) % 10), ((doc->CurSeconds / 10) % 6), (doc->CurSeconds % 10));
-	pDC->DrawText(strTime, &rect, DT_SINGLELINE | DT_NOCLIP);
-}
+
 
 void CLabyrinthGameView::DrawNames(CDC * pDC)
 {
@@ -450,13 +440,6 @@ void CLabyrinthGameView::OnInitialUpdate()
 }
 
 
-void CLabyrinthGameView::OnTimer(UINT_PTR nIDEvent)
-{
-	GetDocument()->CurSeconds++;
-	this->RedrawWindow();
-
-	CView::OnTimer(nIDEvent);
-}
 
 void CLabyrinthGameView::FinishGame()
 {

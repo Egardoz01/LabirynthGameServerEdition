@@ -38,7 +38,6 @@ public:
 	int Enemy_y;
 	int CheeseCell_x;
 	int CheeseCell_y;
-	int CurSeconds;
 
 	bool GameStarted;
 	bool WaitingForSecondPlayer;

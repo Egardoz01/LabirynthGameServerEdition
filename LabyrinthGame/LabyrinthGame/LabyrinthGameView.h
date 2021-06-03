@@ -58,7 +58,6 @@ protected:
 
 private:
 	void DrawGrid(CDC* pDC);
-	void DrawTime(CDC* pDC);
 	void DrawNames(CDC * pDC);
 	void DrawMouse(HDC hdc);
 	void DrawWaitingScreen(CDC * pDC);
@@ -70,7 +69,6 @@ public:
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 //	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
 	virtual void OnInitialUpdate();
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnNewGame();
 	afx_msg void OnFinishGame();
 	afx_msg void OnUpdateFinishGame(CCmdUI *pCmdUI);

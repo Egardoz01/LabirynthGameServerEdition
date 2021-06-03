@@ -80,8 +80,8 @@ void handleMessage(LPSOCKET_INFORMATION soket, DWORD Event, char *str, int len);
 void sendMessage(DWORD Event, char *str);
 
 struct SessionInfo {
-	DWORD player1Event;
-	DWORD player2Event;
+	DWORD player1EventIndex;
+	DWORD player2EventIndex;
 	int player1_x;
 	int player1_y;
 	int player2_x;
@@ -587,7 +587,7 @@ char *messageFillGrid(char *str, int sessionNumber)
 	str[0] = 4;//new Grid
 
 	Grid* grid = new Grid();
-	grid->Initialize(5, 5);
+	grid->Initialize(5, 5);//grid size
 	str[1] = grid->nRows;
 	str[2] = grid->nColumns;
 	int next = 3;
@@ -661,13 +661,13 @@ char* initNewMessage()
 	return str;
 }
 
-void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int len)
+void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD EventIndex, char *str, int len)
 {
 	if (str[0] == 1)//Starting session
 	{
 		if (queue == 0)
 		{
-			queue = Event;
+			queue = EventIndex;
 			for (int i = 0; i < 100; i++)
 				queueName[i] = 0;
 			for (int i = 0; i < str[1]; i++)
@@ -680,8 +680,8 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 			int sessionNumber = sessionNum++;
 			if (sessionNum >= MAX_SESSIONS)
 				sessionNum = 1;
-			_sessions[sessionNumber].player1Event = queue;
-			_sessions[sessionNumber].player2Event = Event;
+			_sessions[sessionNumber].player1EventIndex = queue;
+			_sessions[sessionNumber].player2EventIndex = EventIndex;
 			
 			_sessions[sessionNumber].player1Name = new char[100];
 			_sessions[sessionNumber].player2Name = new char[100];
@@ -714,8 +714,8 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 			messageCords(mess2 + strlen(mess2), sessionNumber);
 
 		
-			sendMessage(_sessions[sessionNumber].player1Event, mess1);
-			sendMessage(_sessions[sessionNumber].player2Event, mess2);
+			sendMessage(_sessions[sessionNumber].player1EventIndex, mess1);
+			sendMessage(_sessions[sessionNumber].player2EventIndex, mess2);
 
 			delete mess1;
 			delete mess2;
@@ -760,19 +760,21 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 
 		char * mess4 = initNewMessage();
 		messageCords(mess4,sessionNumber);
-		sendMessage(_sessions[sessionNumber].player1Event, mess4);
-		sendMessage(_sessions[sessionNumber].player2Event, mess4);
+		sendMessage(_sessions[sessionNumber].player1EventIndex, mess4);
+		sendMessage(_sessions[sessionNumber].player2EventIndex, mess4);
 		delete mess4;
 
 	}
 
 	if (str[0] == 5)//finish game
 	{
+		if (queue == EventIndex)//if user in queue finish game
+			queue = 0;
 		char  Str[200];
 		CListBox  *pLB =
 			(CListBox *)(CListBox::FromHandle(hWnd_LB));
 		FreeSocketInformation(
-			Event - WSA_WAIT_EVENT_0, Str, pLB);
+			EventIndex - WSA_WAIT_EVENT_0, Str, pLB);
 	}
 
 
@@ -782,14 +784,14 @@ void handleMessage(LPSOCKET_INFORMATION SocketInfo, DWORD Event, char *str, int 
 
 
 
-void sendMessage(DWORD Event, char *str)
+void sendMessage(DWORD EventIndex, char *str)
 {
 	DWORD SendBytes;
 	char  Str[200];
 	CListBox  *pLB =
 		(CListBox *)(CListBox::FromHandle(hWnd_LB));
 
-	LPSOCKET_INFORMATION SocketInfo = SocketArray[Event];
+	LPSOCKET_INFORMATION SocketInfo = SocketArray[EventIndex];
 
 	if (SocketInfo == NULL)
 		return;
@@ -809,7 +811,7 @@ void sendMessage(DWORD Event, char *str)
 				"error %d", WSAGetLastError());
 			pLB->AddString(Str);
 			FreeSocketInformation(
-				Event - WSA_WAIT_EVENT_0, Str, pLB);
+				EventIndex - WSA_WAIT_EVENT_0, Str, pLB);
 			return;
 		}
 

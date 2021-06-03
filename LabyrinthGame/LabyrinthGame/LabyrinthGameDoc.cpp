@@ -97,30 +97,30 @@ CLabyrinthGameDoc::CLabyrinthGameDoc() noexcept
 
 char* CLabyrinthGameDoc:: GetMessageGameStart()
 {
-	char * kek = new char[1024];
-	kek[0] = 1;//new session
-	kek[1] = playerName.GetLength();
+	char * message = new char[1024];
+	message[0] = 1;//new session
+	message[1] = playerName.GetLength();
 	for (int i = 0; i < playerName.GetLength(); i++)
-		kek[i + 2] = playerName[i];
-	return kek;
+		message[i + 2] = playerName[i];
+	return message;
 }
 
 
 char* CLabyrinthGameDoc::GetMessageMouseMove(int x)
 {
-	char * kek = new char[1024];
-	kek[0] = 3;
-	kek[1] = sessionNumber;
-	kek[2] = player;
-	kek[3] = x;//1-left 2-top 3-right 4-bot
-	return kek;
+	char * message = new char[1024];
+	message[0] = 3;
+	message[1] = sessionNumber;
+	message[2] = player;
+	message[3] = x;//1-left 2-top 3-right 4-bot
+	return message;
 }
 
 char* CLabyrinthGameDoc::GetMessageGameFinish()
 {
-	char * kek = new char[1024];
-	kek[0] = 5;//delete session
-	return kek;
+	char * message = new char[1024];
+	message[0] = 5;//delete session
+	return message;
 }
 
 int CLabyrinthGameDoc::handleGameStart(char * str)
@@ -231,6 +231,7 @@ void CLabyrinthGameDoc::StartGame()
 {
 	if (netHelper.Connect(server,port))
 	{
+		WaitingForSecondPlayer = true;
 		CLabyrinthGameView * curView = NULL;
 		POSITION pos = GetFirstViewPosition();
 		if (pos != NULL)
@@ -241,7 +242,6 @@ void CLabyrinthGameDoc::StartGame()
 		}
 		//Sleep(1000);
 		netHelper.Send(GetMessageGameStart());
-		WaitingForSecondPlayer = true;
 		AfxBeginThread(ListenThread, NULL);
 
 		
@@ -283,7 +283,7 @@ void CLabyrinthGameDoc::FinishGame(bool congrat, bool win)
 	{
 		CString strCongratulations;
 		if(win)
-			strCongratulations.Format(_T("ПОЗДРАВЛЯЕМ!!!\nВы выбрались из DUNGEON за %d секунд"), CurSeconds);
+			strCongratulations.Format(_T("ПОЗДРАВЛЯЕМ!!!\nВы выбрались из DUNGEON"));
 		else
 			strCongratulations.Format(_T("Вы проиграли\nНе растраивайтесь, повезет в следующей катке"));
 
